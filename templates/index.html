@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title%}Weather App - Home{% endblock %}
+
+{% block content %}
+
+       <div class="app">
+
+            <!-- ALWAYS SEARCH -->
+            <form method="POST" class="search-center">
+                <input type="text" name="city" placeholder="Search city..." required>
+                <button type="submit"><img src="static/search.svg" alt="Search"></button>
+            </form>
+
+            {% if weather %}
+            <div class="glass-card">
+
+                <div class="top">
+                    <h2>{{ weather.city }}</h2>
+
+                    <div class="main-weather">
+                        <img src="http://openweathermap.org/img/wn/{{ forecast[0].icon }}@2x.png">
+                        <h1 id="temp">{{ weather.temp }}°C</h1>
+                        <p id="desc">{{ weather.description }}</p>
+                    </div>
+                </div>
+
+                <div class="week">
+                    {% for day in forecast %}
+                    <div class="day" onclick="changeDay({{ loop.index0 }})">
+                        <p>{{ day.day }}</p>
+                        <img src="http://openweathermap.org/img/wn/{{ day.icon }}.png">
+                        <span>{{ day.temp }}°</span>
+                    </div>
+                    {% endfor %}
+                </div>
+
+            </div>
+            {% endif %}
+
+        </div>
+
+        <!-- JSON -->
+        {% if forecast %}
+        <script id="weatherData" type="application/json">
+            {{ forecast | tojson }}
+        </script>
+        {% endif %}
+
+        <!-- JS -->
+        <script>
+            let forecast = [];
+
+            const dataElement = document.getElementById("weatherData");
+            if (dataElement) {
+                forecast = JSON.parse(dataElement.textContent);
+            }
+
+            function changeDay(index) {
+                const day = forecast[index];
+
+                const tempEl = document.getElementById("temp");
+                const descEl = document.getElementById("desc");
+
+                // fade out
+                tempEl.style.opacity = "0";
+                descEl.style.opacity = "0";
+
+                setTimeout(() => {
+                    // change content
+                    tempEl.innerText = day.temp + "°C";
+                    descEl.innerText = day.description;
+
+                    // fade in
+                    tempEl.style.opacity = "1";
+                    descEl.style.opacity = "1";
+                }, 200);
+
+                // active state
+                document.querySelectorAll(".day").forEach(d => d.classList.remove("active"));
+                document.querySelectorAll(".day")[index].classList.add("active");
+            }
+            </script>
+
+{%endblock%}
+
